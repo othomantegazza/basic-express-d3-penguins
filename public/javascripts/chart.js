@@ -88,8 +88,8 @@ const plotPenguins = (d) => {
         .selectAll("circle")
         .data(d)
         .join("circle")
-        .attr("cx", d => xScale(d.bill_length_mm))
-        .attr("cy", d => yScale(d.bill_depth_mm))
+        .attr("cx", d => xScale(d[xName]))
+        .attr("cy", d => yScale(d[yName]))
         .attr("fill", d => fillScale(d[fillName]) + "99")
         .attr("r", 8)
         .on("mouseenter", function (e, d) {
