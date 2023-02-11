@@ -3,21 +3,24 @@ const plotPenguins = (d) => {
     let tooltipOffsetPx = 10
     const xName = "bill_length_mm"
     const yName = "bill_depth_mm"
-    const x = d => +d[xName]
-    const y = d => +d[yName]
+    const fillName = "species"
     const width = 1000
     const height = 500
     const margin = 20
     const labelSpace = 30
-    const fill = "#44009966"
+    // const fill = "#44009966"
     const fillHover = "#220077"
 
+    const x = d => +d[xName]
+    const y = d => +d[yName]
+    const fill = d => d[fillName]
     const marginTop = margin + labelSpace
 
     d = d.filter(i => !isNaN(i[xName]) && !isNaN(i[yName]))
 
     const X = d3.map(d, x)
     const Y = d3.map(d, y)
+    const FILL = d3.map(d, fill)
 
     const xScale = d3.scaleLinear()
         .domain(d3.extent(X))
@@ -27,6 +30,10 @@ const plotPenguins = (d) => {
         .domain(d3.extent(Y))
         .range([height - margin, 0 + marginTop])
 
+    const fillScale = d3.scaleOrdinal()
+        .domain([...new Set(FILL)])
+        .range(['#cd9600', '#00bfc4', '#00be67'])
+
     const xAxis = d3.axisTop(xScale)
 
     const yAxis = d3.axisLeft(yScale)
@@ -35,9 +42,11 @@ const plotPenguins = (d) => {
         d,
         X,
         Y,
+        FILL,
         xrange: d3.extent(X),
         xvals: d3.map(X, xScale),
         yvals: d3.map(Y, yScale),
+        fillDomain: [...new Set(FILL)]
     })
 
     let tooltip = d3.select("body")
@@ -81,13 +90,13 @@ const plotPenguins = (d) => {
         .join("circle")
         .attr("cx", d => xScale(d.bill_length_mm))
         .attr("cy", d => yScale(d.bill_depth_mm))
+        .attr("fill", d => fillScale(d[fillName]) + "99")
         .attr("r", 8)
-        .style("fill", fill)
         .on("mouseenter", function (e, d) {
             console.log({ e, d })
 
             d3.select(this)
-                .style("fill", fillHover)
+                .attr("fill", fillHover)
 
             d3.select(".svg-tooltip")
                 .style("visibility", "visible")
@@ -104,7 +113,7 @@ const plotPenguins = (d) => {
                 .transition()
                 .duration(200)
                 .ease(d3.easeSinOut)
-                .style("fill", fill)
+                .attr("fill", d => fillScale(d[fillName]) + "99")
 
             d3.select(".svg-tooltip")
                 .style("visibility", "hidden")
